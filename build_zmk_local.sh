@@ -386,11 +386,10 @@ check_podman_requirements() {
   if command -v getenforce &>/dev/null; then
     local selinux_mode=$(getenforce 2>/dev/null || echo "Unknown")
     if [[ "$selinux_mode" == "Enforcing" ]] && [ -d "./.west" ]; then
-      local west_context=$(/usr/bin/ls -Z .west/config 2>/dev/null | awk '{print $1}' | cut -d: -f1)
-      local current_context=$(/usr/bin/ls -Zd . 2>/dev/null | awk '{print $1}' | cut -d: -f1)
+      local current_context=$(/usr/bin/ls -Zd . 2>/dev/null | awk '{print $1}' | cut -d: -f3)
 
-      if [[ "$west_context" == "system_u" ]] || [[ "$current_context" != "container_file_t" ]]; then
-        log_warning "SELinux context issue detected with .west directory"
+      if [[ "$current_context" != "container_file_t" ]]; then
+        log_warning "SELinux context issue detected with project directory"
         echo ""
         echo "Podman requires correct SELinux contexts for user namespace mapping:"
         echo "  sudo chcon -Rt container_file_t ./"
